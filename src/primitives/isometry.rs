@@ -2,13 +2,11 @@ use std::ops::{Mul, MulAssign};
 
 use crate::num::Num;
 
-use super::rotation::Rotation;
-
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Isometry<T> {
     pub x: T,
     pub y: T,
-    pub theta: Rotation<T>,
+    pub theta: T,
 }
 
 impl<T: Default> Isometry<T> {
@@ -19,7 +17,7 @@ impl<T: Default> Isometry<T> {
         }
     }
 
-    pub fn rotation(theta: Rotation<T>) -> Self {
+    pub fn rotation(theta: T) -> Self {
         Self {
             theta,
             ..Self::default()

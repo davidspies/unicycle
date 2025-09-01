@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 
 use crate::{
     finite::Finite,
-    primitives::{Control, Isometry, Rotation},
+    primitives::{Control, Isometry},
 };
 
 pub struct Curve {
@@ -69,15 +69,15 @@ impl Curve {
         let (t_i, isom_i) = &self.interpolation_points[i];
         let (t_j, _) = self.interpolation_points[j];
         let middle_t = (*t_i + t_j) / 2.;
-        let middle_theta = Rotation::new_normalize(self.theta_at(middle_t));
-        let d_theta = isom_i.theta.angle_to(middle_theta);
+        let middle_theta = self.theta_at(middle_t);
+        let d_theta = middle_theta - isom_i.theta;
         let a = self.lin_accel();
         let v_i = self.start_control.linear + a * *t_i;
         let v_time = self.start_control.linear + a * time;
         let dist = (v_i + v_time) * ((time - *t_i) / 2.);
         let Isometry { x, y, theta: _ } =
             *isom_i * Isometry::rotation(d_theta) * Isometry::forward_translation(dist);
-        let theta_t = Rotation::new_normalize(self.theta_at(time));
+        let theta_t = self.theta_at(time);
         Isometry {
             x,
             y,

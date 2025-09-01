@@ -1,7 +1,7 @@
 use crate::{
     finite::Finite,
     num::Num,
-    primitives::{control::SlewRate, Control, Isometry, Rotation},
+    primitives::{control::SlewRate, Control, Isometry},
 };
 
 use self::error_analysis::error_analysis;
@@ -74,7 +74,7 @@ impl<T: Num, F: FnMut(Finite, &Isometry<T>)> CurveBuilder<T, F> {
             angular: ang_0,
         } = control_0;
 
-        let theta = Rotation::new_normalize(ang_0.clone() * 2.0);
+        let theta = ang_0.clone() * 2.0;
         let (x_error, y_error) = error_analysis(
             ang_accel.base_value(),
             ang_0.base_value(),

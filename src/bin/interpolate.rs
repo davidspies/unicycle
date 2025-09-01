@@ -4,8 +4,12 @@ use std::str::FromStr;
 use unicycle::primitives::{Control, Isometry};
 use unicycle::{Curve, Finite};
 
-fn parse_arg<T: FromStr>(name: &str, idx: usize, args: &[String]) -> T where <T as FromStr>::Err: std::fmt::Display {
-    args.get(idx).unwrap_or_else(|| panic!("missing {name}"))
+fn parse_arg<T: FromStr>(name: &str, idx: usize, args: &[String]) -> T
+where
+    <T as FromStr>::Err: std::fmt::Display,
+{
+    args.get(idx)
+        .unwrap_or_else(|| panic!("missing {name}"))
         .parse::<T>()
         .unwrap_or_else(|e| panic!("invalid {name}: {e}"))
 }
@@ -21,7 +25,11 @@ fn main() {
         eprintln!("Usage: {} <start_linear> <start_angular> <end_linear> <end_angular> <duration_secs> <tolerance>", args[0]);
         std::process::exit(1);
     }
-    assert!(args.len() == 7, "expected 6 positional arguments, got {}", args.len() - 1);
+    assert!(
+        args.len() == 7,
+        "expected 6 positional arguments, got {}",
+        args.len() - 1
+    );
     let start_linear: f64 = parse_arg("start_linear", 1, &args);
     let start_angular: f64 = parse_arg("start_angular", 2, &args);
     let end_linear: f64 = parse_arg("end_linear", 3, &args);
@@ -29,8 +37,14 @@ fn main() {
     let duration_secs: f64 = parse_arg("duration_secs", 5, &args);
     let tolerance: f64 = parse_arg("tolerance", 6, &args);
 
-    let start_control: Control<Finite> = Control { linear: Finite::try_new(start_linear).unwrap(), angular: Finite::try_new(start_angular).unwrap() };
-    let end_control: Control<Finite> = Control { linear: Finite::try_new(end_linear).unwrap(), angular: Finite::try_new(end_angular).unwrap() };
+    let start_control: Control<Finite> = Control {
+        linear: Finite::try_new(start_linear).unwrap(),
+        angular: Finite::try_new(start_angular).unwrap(),
+    };
+    let end_control: Control<Finite> = Control {
+        linear: Finite::try_new(end_linear).unwrap(),
+        angular: Finite::try_new(end_angular).unwrap(),
+    };
     let duration = Finite::try_new(duration_secs).expect("duration must be finite");
     let tol = Finite::try_new(tolerance).expect("tolerance must be finite");
 
@@ -48,5 +62,11 @@ fn main() {
 }
 
 fn print_row(t: Finite, isom: Isometry<Finite>) {
-    println!("{},{},{},{}", t.to_f64(), isom.x.to_f64(), isom.y.to_f64(), isom.theta.value().to_f64());
+    println!(
+        "{},{},{},{}",
+        t.to_f64(),
+        isom.x.to_f64(),
+        isom.y.to_f64(),
+        isom.theta.to_f64()
+    );
 }
