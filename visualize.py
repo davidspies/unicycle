@@ -20,6 +20,7 @@ import math
 from dataclasses import dataclass
 from pathlib import Path
 
+
 @dataclass
 class Point:
     t: float
@@ -30,9 +31,18 @@ class Point:
 
 def run_interpolate(args) -> list[Point]:
     cmd = [
-        "cargo", "run", "--quiet", "--bin", "interpolate",
-        str(args.start_linear), str(args.start_angular), str(args.end_linear), str(args.end_angular),
-        str(args.duration), str(args.tolerance)
+        "cargo",
+        "run",
+        "--quiet",
+        "--bin",
+        "interpolate",
+        "--",
+        str(args.start_linear),
+        str(args.start_angular),
+        str(args.end_linear),
+        str(args.end_angular),
+        str(args.duration),
+        str(args.tolerance),
     ]
     proc = subprocess.run(cmd, capture_output=True, text=True)
     if proc.returncode != 0:
@@ -41,12 +51,20 @@ def run_interpolate(args) -> list[Point]:
     reader = csv.DictReader(line for line in proc.stdout.splitlines() if line.strip())
     points: list[Point] = []
     for row in reader:
-        points.append(Point(t=float(row['t']), x=float(row['x']), y=float(row['y']), theta=float(row['theta'])))
+        points.append(
+            Point(
+                t=float(row["t"]),
+                x=float(row["x"]),
+                y=float(row["y"]),
+                theta=float(row["theta"]),
+            )
+        )
     return points
 
 
 def plot(points: list[Point]):
     import matplotlib.pyplot as plt
+
     if not points:
         print("No points to visualize", file=sys.stderr)
         return
@@ -58,32 +76,33 @@ def plot(points: list[Point]):
     # Approximate linear speed along path (finite differences)
     v = []
     for i in range(1, len(points)):
-        dt = points[i].t - points[i-1].t
-        if dt <= 0: dt = 1e-9
-        dx = points[i].x - points[i-1].x
-        dy = points[i].y - points[i-1].y
+        dt = points[i].t - points[i - 1].t
+        if dt <= 0:
+            dt = 1e-9
+        dx = points[i].x - points[i - 1].x
+        dy = points[i].y - points[i - 1].y
         v.append(math.hypot(dx, dy) / dt)
 
     fig, axs = plt.subplots(2, 2, figsize=(10, 8))
-    axs[0,0].plot(x, y, '-o', markersize=2)
-    axs[0,0].set_title('Path (x vs y)')
-    axs[0,0].set_xlabel('x (m)')
-    axs[0,0].set_ylabel('y (m)')
-    axs[0,0].axis('equal')
+    axs[0, 0].plot(x, y, "-o", markersize=2)
+    axs[0, 0].set_title("Path (x vs y)")
+    axs[0, 0].set_xlabel("x (m)")
+    axs[0, 0].set_ylabel("y (m)")
+    axs[0, 0].axis("equal")
 
-    axs[0,1].plot(t, theta)
-    axs[0,1].set_title('Theta vs Time')
-    axs[0,1].set_xlabel('t (s)')
-    axs[0,1].set_ylabel('theta (rad)')
+    axs[0, 1].plot(t, theta)
+    axs[0, 1].set_title("Theta vs Time")
+    axs[0, 1].set_xlabel("t (s)")
+    axs[0, 1].set_ylabel("theta (rad)")
 
-    midpoints = [(t[i-1] + t[i]) / 2 for i in range(1, len(t))]
-    axs[1,0].plot(midpoints, v)
-    axs[1,0].set_title('Approx Linear Speed vs Time')
-    axs[1,0].set_xlabel('t (s)')
-    axs[1,0].set_ylabel('speed (m/s)')
+    midpoints = [(t[i - 1] + t[i]) / 2 for i in range(1, len(t))]
+    axs[1, 0].plot(midpoints, v)
+    axs[1, 0].set_title("Approx Linear Speed vs Time")
+    axs[1, 0].set_xlabel("t (s)")
+    axs[1, 0].set_ylabel("speed (m/s)")
 
-    axs[1,1].axis('off')
-    axs[1,1].text(0.02, 0.98, f"Points: {len(points)}", va='top')
+    axs[1, 1].axis("off")
+    axs[1, 1].text(0.02, 0.98, f"Points: {len(points)}", va="top")
 
     fig.tight_layout()
     plt.show()
@@ -91,16 +110,17 @@ def plot(points: list[Point]):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--start-linear', type=float, required=True)
-    parser.add_argument('--start-angular', type=float, required=True)
-    parser.add_argument('--end-linear', type=float, required=True)
-    parser.add_argument('--end-angular', type=float, required=True)
-    parser.add_argument('--duration', type=float, required=True)
-    parser.add_argument('--tolerance', type=float, default=1e-6)
+    parser.add_argument("--start-linear", type=float, required=True)
+    parser.add_argument("--start-angular", type=float, required=True)
+    parser.add_argument("--end-linear", type=float, required=True)
+    parser.add_argument("--end-angular", type=float, required=True)
+    parser.add_argument("--duration", type=float, required=True)
+    parser.add_argument("--tolerance", type=float, default=1e-6)
     args = parser.parse_args()
 
     points = run_interpolate(args)
     plot(points)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
